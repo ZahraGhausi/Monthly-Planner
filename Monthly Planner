@@ -1,0 +1,225 @@
+import java.util.*;
+import java.util.stream.Collectors;
+
+public class P1 {
+
+    public static void main(String[] args) {
+        Scanner scanner = new Scanner(System.in);
+        HashMap<Integer, HashMap<String, String>> projectPlan = new HashMap<>();
+
+        System.out.println("Enter the month (ex. 1 for January, 2 for February, etc.): ");
+        int month = scanner.nextInt();
+
+        while (true) {
+            System.out.println("\nChoose an action:");
+            System.out.println(); 
+            System.out.println("1. Add project");
+            System.out.println("2. Remove project");
+            System.out.println("3. Modify project");
+            System.out.println("4. View project");
+            System.out.println("5. Search project");
+            System.out.println("6. Print all projects");
+            System.out.println("7. Exit\n");
+
+            int choice = scanner.nextInt();
+            scanner.nextLine(); // Consume newline
+
+            switch (choice) {
+                case 1:
+                    addProject(scanner, projectPlan, month);
+                    break;
+                case 2:
+                    removeProject(scanner, projectPlan, month);
+                    break;
+                case 3:
+                    modifyProject(scanner, projectPlan, month);
+                    break;
+                case 4:
+                    viewProjects(scanner, projectPlan, month);
+                    break;
+                case 5:
+                    searchProject(scanner, projectPlan, month);
+                    break;
+                case 6:
+                    printAllProjects(projectPlan, month);
+                    break;
+                case 7:
+                    System.out.println("Exiting program...");
+                    scanner.close();
+                    System.exit(0);
+                default:
+                    System.out.println("Invalid choice. Please try again.");
+            }
+        }
+    }
+
+    private static void addProject(Scanner scanner, HashMap<Integer, HashMap<String, String>> projectPlan, int month) {
+        System.out.println("Enter the day (1-31): ");
+        int day = scanner.nextInt();
+        if (day < 1 || day > 31) {
+            System.out.println("Invalid day. Please enter a day between 1 and 31.");
+            scanner.nextLine(); // Consume newline
+            return;
+        }
+        
+        System.out.println();        
+        scanner.nextLine(); // Consume newline
+
+        System.out.println("Enter project name: ");
+        String projectName = scanner.nextLine();
+        System.out.println(); 
+
+        System.out.println("Enter project details: ");
+        String details = scanner.nextLine(); 
+        System.out.println();
+
+        if (!projectPlan.containsKey(month)) {
+            projectPlan.put(month, new HashMap<>());
+        }
+
+        projectPlan.get(month).put(day + "_" + projectName, details);
+        System.out.println("Project added successfully!");
+        System.out.println(); 
+    }
+
+    private static void removeProject(Scanner scanner, HashMap<Integer, HashMap<String, String>> projectPlan, int month) {
+        System.out.println("Enter the day (1-31): ");
+        int day = scanner.nextInt();
+        if (day < 1 || day > 31) {
+            System.out.println("Invalid day. Please enter a day between 1 and 31.");
+            scanner.nextLine(); // Consume newline
+            return;
+        }
+        scanner.nextLine(); // Consume newline
+
+        System.out.println("Enter project name to remove: ");
+        String projectName = scanner.nextLine();
+        System.out.println(); 
+
+        if (projectPlan.containsKey(month)) {
+            String keyToRemove = projectPlan.get(month).keySet().stream()
+                .filter(key -> key.startsWith(day + "_" + projectName))
+                .findFirst()
+                .orElse(null);
+            if (keyToRemove != null) {
+                projectPlan.get(month).remove(keyToRemove);
+                System.out.println("Project removed successfully!");
+            } else {
+                System.out.println("Project not found.");
+                System.out.println(); 
+            }
+        } else {
+            System.out.println("No projects found for this month.");
+            System.out.println(); 
+        }
+    }
+
+    private static void modifyProject(Scanner scanner, HashMap<Integer, HashMap<String, String>> projectPlan, int month) {
+        System.out.println("Enter the day (1-31): ");
+        int day = scanner.nextInt();
+        if (day < 1 || day > 31) {
+            System.out.println("Invalid day. Please enter a day between 1 and 31.");
+            scanner.nextLine(); // Consume newline
+            return;
+
+        }
+        scanner.nextLine(); // Consume newline
+
+        System.out.println("Enter project name to modify: ");
+        String projectName = scanner.nextLine();
+        System.out.println(); 
+
+        if (projectPlan.containsKey(month)) {
+            String keyToModify = projectPlan.get(month).keySet().stream()
+                .filter(key -> key.startsWith(day + "_" + projectName))
+                .findFirst()
+                .orElse(null);
+            if (keyToModify != null) {
+                System.out.println("Enter new project details: ");
+                String newDetails = scanner.nextLine();
+                projectPlan.get(month).put(keyToModify, newDetails);
+                System.out.println("Project modified successfully!");
+            } else {
+                System.out.println("Project not found.");
+            }
+        } else {
+            System.out.println("No projects found for this month.");
+        }
+    }
+
+    private static void viewProjects(Scanner scanner, HashMap<Integer, HashMap<String, String>> projectPlan, int month) {
+        System.out.println("Enter the day (1-31) to view projects:");
+        int day = scanner.nextInt();
+        if (day < 1 || day > 31) {
+            System.out.println("Invalid day. Please enter a day between 1 and 31.");
+            scanner.nextLine(); // Consume newline
+            return;
+        }
+
+        if (projectPlan.containsKey(month)) {
+            boolean found = false;
+            for (Map.Entry<String, String> entry : projectPlan.get(month).entrySet()) {
+                String key = entry.getKey();
+                if (key.startsWith(day + "_")) {
+                    String projectName = key.substring(key.indexOf("_") + 1);
+                    String details = entry.getValue();
+                    System.out.println("Project: " + projectName);
+                    System.out.println("Details: " + details);
+                    found = true;
+                }
+            }
+            if (!found) {
+                System.out.println("No projects found for this day.");
+            }
+            System.out.println(); 
+        } else {
+            System.out.println("No projects found for this month.");
+        }
+        System.out.println(); 
+    }
+
+    private static void searchProject(Scanner scanner, HashMap<Integer, HashMap<String, String>> projectPlan, int month) {
+        System.out.println("Enter project name to search: ");
+        System.out.println(); 
+        String projectName = scanner.nextLine();
+
+        boolean found = false;
+        if (projectPlan.containsKey(month)) {
+            for (Map.Entry<String, String> entry : projectPlan.get(month).entrySet()) {
+                String key = entry.getKey();
+                if (key.contains("_" + projectName)) {
+                    int day = Integer.parseInt(key.split("_")[0]);
+                    String details = entry.getValue();
+                    System.out.println("Day: " + day);
+                    System.out.println("Project: " + projectName);
+                    System.out.println("Details: " + details);
+                    found = true;
+                }
+            }
+        }
+        if (!found) {
+            System.out.println("Project not found.");
+            System.out.println();
+        }
+    }
+
+    private static void printAllProjects(HashMap<Integer, HashMap<String, String>> projectPlan, int month) {
+        if (projectPlan.containsKey(month)) {
+            projectPlan.get(month).entrySet().stream()
+                .sorted(Map.Entry.comparingByKey())
+                .forEach(entry -> {
+                    String key = entry.getKey();
+                    int day = Integer.parseInt(key.split("_")[0]);
+                    String projectName = key.substring(key.indexOf("_") + 1);
+                    String details = entry.getValue();
+                    System.out.println("Day: " + day);
+                    System.out.println("Project: " + projectName);
+                    System.out.println("Details: " + details);
+                    System.out.println();
+                });
+        } else {
+            System.out.println("No projects found for this month.");
+            System.out.println(); 
+        }
+    }
+}
